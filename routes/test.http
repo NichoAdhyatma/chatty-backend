@@ -1,0 +1,15 @@
+POST {{local}}/api/login
+Content-Type: application/x-www-form-urlencoded
+
+avatar = https://github-content/sha/avatar.png &
+email = nicho@gmail.com &
+type = 2 &
+name = nico &
+open_id = 12
+
+###
+
+###
+GET {{local}}/api/test
+Accept: application/json
+
