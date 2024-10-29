@@ -13,3 +13,8 @@ open_id = 12
 GET {{local}}/api/test
 Accept: application/json
 
+
+### Get Contact
+GET {{local}}/api/contact?user_token=9a167953ca146b0a410efa541a584ad9
+Accept: application/json
+Authorization: Bearer 575c6580f21d683364f659aca554b739

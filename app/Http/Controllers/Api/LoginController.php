@@ -84,6 +84,7 @@ class LoginController extends Controller
                 ->update([
                     'access_token' => $access_token,
                     'expire_date' => $expire_date,
+                    'avatar' => $validated['avatar'],
                     'updated_at' => Carbon::now()
                 ]);
 
@@ -101,6 +102,22 @@ class LoginController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function contact(Request $request)
+    {
+        $token = $request->user->token;
+
+        $result = DB::table('users')
+            ->select('token', 'avatar', 'description', 'online', 'name')
+            ->where('token', '!=', $token)
+            ->get();
+
+        return response()->json([
+            'code' => 1,
+            'data' => $result,
+            'message' => 'Successfully get contact data'
+        ]);
     }
 
 }
