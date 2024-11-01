@@ -18,3 +18,8 @@ Accept: application/json
 GET {{local}}/api/contact?user_token=9a167953ca146b0a410efa541a584ad9
 Accept: application/json
 Authorization: Bearer 575c6580f21d683364f659aca554b739
+
+
+### Get RTC Token
+GET {{local}}/api/get_rtc_token
+Accept: application/json
