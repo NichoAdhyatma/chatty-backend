@@ -20,4 +20,10 @@ Route::group(['namespace' => 'Api'], function () {
 
     Route::any('/get_rtc_token', [AccessTokenController::class, 'getRtcToken'])
         ->middleware('checkUser');
+
+    Route::any('/send_notice', [LoginController::class, 'sendNotice'])
+        ->middleware('checkUser');
+
+    Route::any('/bind_fcmtoken', [LoginController::class, 'bindFcmtoken'])
+        ->middleware('checkUser');
 });

@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Contract\Messaging;
 
 class LoginController extends Controller
 {
@@ -109,7 +111,11 @@ class LoginController extends Controller
         $token = $request->user->token;
 
         $result = DB::table('users')
-            ->select('token', 'avatar', 'description', 'online', 'name')
+            ->select('token',
+                'avatar',
+                'description',
+                'online',
+                'name')
             ->where('token', '!=', $token)
             ->get();
 
@@ -117,6 +123,121 @@ class LoginController extends Controller
             'code' => 1,
             'data' => $result,
             'message' => 'Successfully get contact data'
+        ]);
+    }
+
+    public function sendNotice(Request $request)
+    {
+        try {
+            $user_token = $request->user->token;
+            $user_avatar = $request->user->avatar;
+            $user_name = $request->user->name;
+            $to_token = $request->input('to_token');
+            $to_avatar = $request->input('to_avatar');
+            $to_name = $request->input('to_name');
+            $call_type = $request->input('call_type');
+            $doc_id = $request->input('doc_id');
+            if (empty($doc_id)) {
+                $doc_id = "";
+            }
+            $result = DB::table('users')
+                ->select('token',
+                    'avatar',
+                    'fcm_token',
+                    'online',
+                    'name')
+                ->where('token', '=', $to_token)
+                ->first();
+            $device_token = $result->fcm_token;
+            try {
+                if (!empty($device_token)) {
+                    $messaging = app('firebase.messaging');
+                    if($call_type == 'cancel') {
+                        $message = CloudMessage::fromArray([
+                            'token' => $device_token,
+                            'notification' => [
+                                'title' => $user_name,
+                                'body' => 'Call from ' . $user_name,
+                            ],
+                            'data' => [
+                                'avatar' => $user_avatar,
+                                'name' => $user_name,
+                                'call_type' => $call_type,
+                                'doc_id' => $doc_id,
+                                'token' => $user_token
+                            ]
+                        ]);
+
+                        $messaging->send($message);
+                    } else if($call_type == "voice") {
+                        $message = CloudMessage::fromArray([
+                            'token' => $device_token,
+                            'data' => [
+                                'avatar' => $user_avatar,
+                                'name' => $user_name,
+                                'call_type' => $call_type,
+                                'doc_id' => $doc_id,
+                                'token' => $user_token
+                            ],
+                            'android' => [
+                                'priority' => 'high',
+                                'notification' => [
+                                    'channel_id' => 'xxxx',
+                                    'title' => 'Voice call made by ' . $user_name,
+                                    'body' => 'Please click to answer the voice call',
+                                ],
+                            ],
+                        ]);
+
+                        $messaging->send($message);
+
+                    }
+                }
+            } catch (Exception $e) {
+                return response()->json([
+                    'code' => 0,
+                    'data' => null,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            return response()->json([
+                'code' => 1,
+                'data' => $result,
+                'message' => 'Successfully send notification'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function bindFcmToken(Request $request)
+    {
+        $token = $request->user_token;
+        $fcmtoken = $request->input('fcmtoken');
+
+        if(empty($fcmtoken)) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => 'Invalid fcm token'
+            ]);
+        }
+
+        $result = DB::table('users')
+            ->where('token', '=', $token)
+            ->update([
+                'fcm_token' => $fcmtoken,
+                'updated_at' => Carbon::now()
+            ]);
+
+        return response()->json([
+            'code' => 1,
+            'data' => $result,
+            'message' => 'Successfully bind fcm token'
         ]);
     }
 
