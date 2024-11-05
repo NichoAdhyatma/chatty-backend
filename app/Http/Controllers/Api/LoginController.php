@@ -132,14 +132,18 @@ class LoginController extends Controller
             $user_token = $request->user->token;
             $user_avatar = $request->user->avatar;
             $user_name = $request->user->name;
+
             $to_token = $request->input('to_token');
             $to_avatar = $request->input('to_avatar');
             $to_name = $request->input('to_name');
+
             $call_type = $request->input('call_type');
             $doc_id = $request->input('doc_id');
+
             if (empty($doc_id)) {
                 $doc_id = "";
             }
+
             $result = DB::table('users')
                 ->select('token',
                     'avatar',
@@ -148,7 +152,9 @@ class LoginController extends Controller
                     'name')
                 ->where('token', '=', $to_token)
                 ->first();
+
             $device_token = $result->fcm_token;
+
             try {
                 if (!empty($device_token)) {
                     $messaging = app('firebase.messaging');
@@ -208,7 +214,7 @@ class LoginController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'code' => 0,
-                'data' => null,
+                'data' => $e->getLine(),
                 'message' => $e->getMessage()
             ]);
         }
