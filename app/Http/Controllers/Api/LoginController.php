@@ -216,7 +216,7 @@ class LoginController extends Controller
 
     public function bindFcmToken(Request $request)
     {
-        $token = $request->user_token;
+        $token = $request->user->token;
         $fcmtoken = $request->input('fcmtoken');
 
         if(empty($fcmtoken)) {
@@ -227,16 +227,23 @@ class LoginController extends Controller
             ]);
         }
 
-        $result = DB::table('users')
-            ->where('token', '=', $token)
-            ->update([
-                'fcm_token' => $fcmtoken,
-                'updated_at' => Carbon::now()
+        try {
+            $result = DB::table('users')
+                ->where('token', '=', $token)
+                ->update([
+                    'fcm_token' => $fcmtoken,
+                ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => $e->getMessage()
             ]);
+        }
 
         return response()->json([
             'code' => 1,
-            'data' => $result,
+            'data' => "{ 'token': $token, 'fcmtoken': $fcmtoken, 'result': $result }",
             'message' => 'Successfully bind fcm token'
         ]);
     }

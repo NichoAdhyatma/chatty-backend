@@ -24,6 +24,6 @@ Route::group(['namespace' => 'Api'], function () {
     Route::any('/send_notice', [LoginController::class, 'sendNotice'])
         ->middleware('checkUser');
 
-    Route::any('/bind_fcmtoken', [LoginController::class, 'bindFcmtoken'])
+    Route::any('/bind_fcmtoken', [LoginController::class, 'bindFcmToken'])
         ->middleware('checkUser');
 });
