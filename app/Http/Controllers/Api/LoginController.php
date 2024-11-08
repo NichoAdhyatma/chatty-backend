@@ -208,7 +208,7 @@ class LoginController extends Controller
             }
             return response()->json([
                 'code' => 1,
-                'data' => $result,
+                'data' => "{ 'token': $user_token, 'device_token': $device_token }",
                 'message' => 'Successfully send notification'
             ]);
         } catch (Exception $e) {
@@ -252,6 +252,31 @@ class LoginController extends Controller
             'data' => "{ 'token': $token, 'fcmtoken': $fcmtoken, 'result': $result }",
             'message' => 'Successfully bind fcm token'
         ]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $file = $request->file('file');
+        try {
+            $extension = $file->getClientOriginalExtension();
+            $fullNameFile = uniqid() . '.' . $extension;
+            $timeDir = date("Ymd");
+            $file->storeAs($timeDir, $fullNameFile, 'public');
+            $url = config('app.ngrok_url') . '/storage/' . $timeDir . '/' . $fullNameFile;
+
+            return response()->json([
+                'code' => 1,
+                'data' => $url,
+                'message' => 'Successfully upload image'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
 }

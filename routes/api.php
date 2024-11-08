@@ -26,4 +26,7 @@ Route::group(['namespace' => 'Api'], function () {
 
     Route::any('/bind_fcmtoken', [LoginController::class, 'bindFcmToken'])
         ->middleware('checkUser');
+
+    Route::any('/upload_photo', [LoginController::class, 'uploadImage'])
+        ->middleware('checkUser');
 });

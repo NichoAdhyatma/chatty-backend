@@ -128,4 +128,8 @@ return [
         'app_certificate' => env('AGORA_APP_CERTIFICATE'),
     ],
 
+    'ngrok_url' => env('NGROK_URL'),
+
+
+
 ];
