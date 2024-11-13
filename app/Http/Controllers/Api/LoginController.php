@@ -158,7 +158,7 @@ class LoginController extends Controller
             try {
                 if (!empty($device_token)) {
                     $messaging = app('firebase.messaging');
-                    if($call_type == 'cancel') {
+                    if ($call_type == 'cancel') {
                         $message = CloudMessage::fromArray([
                             'token' => $device_token,
                             'notification' => [
@@ -175,7 +175,7 @@ class LoginController extends Controller
                         ]);
 
                         $messaging->send($message);
-                    } else if($call_type == "voice") {
+                    } else if ($call_type == "voice") {
                         $message = CloudMessage::fromArray([
                             'token' => $device_token,
                             'data' => [
@@ -197,6 +197,27 @@ class LoginController extends Controller
 
                         $messaging->send($message);
 
+                    } else if ($call_type == "video") {
+                        $message = CloudMessage::fromArray([
+                            'token' => $device_token,
+                            'data' => [
+                                'avatar' => $user_avatar,
+                                'name' => $user_name,
+                                'call_type' => $call_type,
+                                'doc_id' => $doc_id,
+                                'token' => $user_token
+                            ],
+                            'android' => [
+                                'priority' => 'high',
+                                'notification' => [
+                                    'channel_id' => 'xxxx',
+                                    'title' => 'Video call made by ' . $user_name,
+                                    'body' => 'Please click to answer the video call',
+                                ],
+                            ],
+                        ]);
+
+                        $messaging->send($message);
                     }
                 }
             } catch (Exception $e) {
@@ -225,7 +246,7 @@ class LoginController extends Controller
         $token = $request->user->token;
         $fcmtoken = $request->input('fcmtoken');
 
-        if(empty($fcmtoken)) {
+        if (empty($fcmtoken)) {
             return response()->json([
                 'code' => 0,
                 'data' => null,
