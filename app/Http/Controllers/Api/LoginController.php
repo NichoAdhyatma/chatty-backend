@@ -300,4 +300,57 @@ class LoginController extends Controller
         }
     }
 
+    public function updateProfile(Request $request) {
+        $user = $request->user;
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'description' => 'required',
+            'avatar' => 'required',
+            'online' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => $validator->errors()
+            ]);
+        }
+
+        try {
+            $validated = $validator->validated();
+
+                $result = DB::table('users')
+                    ->where('token', '=', $user->token)
+                    ->update([
+                        'name' => $validated['name'],
+                        'description' => $validated['description'],
+                        'avatar' => $validated['avatar'],
+                        'online' => $validated['online'],
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                if(!empty($result)) {
+                    return response()->json([
+                        'code' => 1,
+                        'data' => $validated,
+                        'message' => 'Successfully update profile'
+                    ]);
+                } else {
+                    return response()->json([
+                        'code' => 0,
+                        'data' => null,
+                        'message' => 'Failed to update profile'
+                    ]);
+                }
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 0,
+                'data' => null,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
 }

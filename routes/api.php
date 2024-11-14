@@ -29,4 +29,6 @@ Route::group(['namespace' => 'Api'], function () {
 
     Route::any('/upload_photo', [LoginController::class, 'uploadImage'])
         ->middleware('checkUser');
+
+    Route::any('/update_profile', [LoginController::class, 'updateProfile'])->middleware('checkUser');
 });
